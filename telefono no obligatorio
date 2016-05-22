@@ -1,0 +1,7 @@
+//Hace que el campo de teléfono no sea obligatorio
+add_filter( 'woocommerce_billing_fields', 'wc_npr_filter_phone', 10, 1 );
+function wc_npr_filter_phone( $address_fields ) {
+ $address_fields['billing_phone']['required'] = false;
+ 
+ return $address_fields;
+}
