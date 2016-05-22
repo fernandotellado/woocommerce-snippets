@@ -1,0 +1,14 @@
+ /**
+ * Quita pestañas
+ *
+ */
+function woo_remove_product_tab($tabs) {
+
+    unset( $tabs['description'] );      		// quita la pestaña de descripción
+    unset( $tabs['reviews'] ); 					// quita la pestaña de valoraciones
+    unset( $tabs['additional_information'] );  	// quita la pestaña de información adicional
+
+ 	return $tabs;
+ 
+}
+add_filter( 'woocommerce_product_tabs', 'woo_remove_product_tab', 98);
