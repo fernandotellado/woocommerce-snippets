@@ -1,0 +1,17 @@
+/**
+ * Cambia el texto de añadir al carrito en la página del producto
+ */
+function woo_custom_cart_button_text() {
+	return __('Comprar', 'woocommerce');
+}
+add_filter('single_add_to_cart_text', 'woo_custom_cart_button_text');
+
+
+
+/**
+ * Cambia el texto de añadir al carrito en los archivos de productos
+ */
+function woo_archive_custom_cart_button_text() {
+	return __( 'Comprar', 'woocommerce' );
+}
+add_filter( 'add_to_cart_text', 'woo_archive_custom_cart_button_text' );
