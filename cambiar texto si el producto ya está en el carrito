@@ -1,0 +1,39 @@
+/**
+ * Cambia el texto de añadir al carrito en páginas de producto simmple
+ */
+add_filter( 'woocommerce_product_single_add_to_cart_text', 'woo_custom_cart_button_text' );
+
+function woo_custom_cart_button_text() {
+
+	global $woocommerce;
+	
+	foreach($woocommerce->cart->get_cart() as $cart_item_key => $values ) {
+		$_product = $values['data'];
+	
+		if( get_the_ID() == $_product->id ) {
+			return __('Ya está en tu carrito - ¿Quieres añadir otro?', 'woocommerce');
+		}
+	}
+	
+	return __('Añadir al carrito', 'woocommerce');
+}
+
+/**
+ * Cambia el texto de añadir al carrito en los archivos de producto
+ */
+add_filter( 'add_to_cart_text', 'woo_archive_custom_cart_button_text' );
+
+function woo_archive_custom_cart_button_text() {
+
+	global $woocommerce;
+	
+	foreach($woocommerce->cart->get_cart() as $cart_item_key => $values ) {
+		$_product = $values['data'];
+	
+		if( get_the_ID() == $_product->id ) {
+			return __('Ya está en tu carrito', 'woocommerce');
+		}
+	}
+	
+	return __('Añadir al carrito', 'woocommerce');
+}
