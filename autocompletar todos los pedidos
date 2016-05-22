@@ -1,0 +1,15 @@
+/**
+ * Autocompleta todos los pedidos
+ * http://docs.woothemes.com/document/automaticaaly-complete-orders/
+ */
+ 
+add_action( 'woocommerce_thankyou', 'custom_woocommerce_auto_complete_order' );
+function custom_woocommerce_auto_complete_order( $order_id ) {
+ global $woocommerce;
+ 
+ if ( ! $order_id ) {
+ return;
+ }
+ $order = new WC_Order( $order_id );
+ $order->update_status( 'completed' );
+}
