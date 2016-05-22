@@ -1,0 +1,15 @@
+/*
+* AÑADIR CAMPO NIF/CIF EN EL FORMULARIO DE PAGO
+*/
+function woo_custom_field_checkout($checkout) {
+  echo '<div id="additional_checkout_field">';
+  woocommerce_form_field( 'nif', array( // Identificador del campo 
+    'type'          => 'text',
+    'class'         => array('my-field-class form-row-wide'),
+    'required'      => true,            // ¿El campo es obligatorio 'true' o 'false'?
+    'label'       => __('NIF / CIF'),   // Nombre del campo 
+    'placeholder'   => __('99999999D'), // Texto de apoyo que se muestra dentro del campo
+  ), $checkout->get_value( 'nif' ));    // Identificador del campo 
+  echo '</div>'; 
+}
+add_action( 'woocommerce_after_checkout_billing_form', 'woo_custom_field_checkout' );
