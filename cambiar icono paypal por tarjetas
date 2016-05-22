@@ -1,0 +1,9 @@
+/**
+ * Cambiar icono estándar de pago por PayPal en la página de pago. (cambia la ruta del código a donde esté tu imagen)
+ */
+ 
+function isa_extended_paypal_icon() {
+     // picture of accepted credit card icons for PayPal payments
+     return get_stylesheet_directory_uri() . '/tarjetas-paypal.jpg';
+}
+add_filter( 'woocommerce_paypal_icon', 'isa_extended_paypal_icon' );
