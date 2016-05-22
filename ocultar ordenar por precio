@@ -1,0 +1,4 @@
+*/CSS para quitar la opción de ordenar por precio */
+.orderby option[value="price"]{ 
+   display: none;
+}
