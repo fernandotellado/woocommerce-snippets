@@ -1,0 +1,12 @@
+/**
+ * WooCommerce Extra Feature
+ * --------------------------
+ *
+ * Replace "Free!" by a custom string
+ *
+ */
+function woo_my_custom_free_message() {
+	return "¡Este producto es GRATIS!";
+}
+
+add_filter('woocommerce_free_price_html', 'woo_my_custom_free_message');
