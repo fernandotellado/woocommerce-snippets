@@ -5,7 +5,7 @@ add_action( 'woocommerce_after_order_notes', 'agrega_mi_campo_personalizado' );
  
 function agrega_mi_campo_personalizado( $checkout ) {
  
-    echo '<div id="additional_checkout_field"><h2>' . __('Información adicional') . '</h2>';
+    echo '<div id="additional_checkout_field"><h3>' . __('Información adicional') . '</h3>';
  
     woocommerce_form_field( 'nif', array(
         'type'          => 'text',
