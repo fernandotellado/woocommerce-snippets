@@ -1,0 +1,41 @@
+/* Enlazar a pestañas de producto de WooCommerce */
+<?php
+/**
+ * wc_direct_link_to_product_tabs
+ *
+ * Allows you to create custom URLs to activate product tabs by default, directly from the URL
+ * ex: http://mysite.com/my-product-name#reviews
+*/
+function wc_direct_link_to_product_tabs() {
+	if( is_product() ) {
+	?>
+	<script type="text/javascript">
+		jQuery(document).ready(function($) {
+	
+		    if( window.location.hash ) {
+			    
+			    // Vars
+			    var tab 		= window.location.hash.replace('#', '');
+			    var tab_content = 'tab-' + tab;
+	
+		    	// Tabs
+		    	$( 'li.description_tab' ).removeClass( 'active' );
+				$( 'li.' + tab + '_tab' ).addClass( 'active' );
+				
+				// Tabs content
+				$( '#tab-description' ).hide();
+				$( '#' + tab_content ).show();
+			}
+		
+		    // when the tab is selected update the url with the hash
+			$(".tabs a").click( function() { 
+				window.location.hash = $(this).parent('li').attr("class").replace(' active', '').replace('_tab', '');
+			});
+	
+		});
+		</script>
+	<?php
+	}
+}
+
+add_action( 'wp_footer', 'wc_direct_link_to_product_tabs', 30 );
