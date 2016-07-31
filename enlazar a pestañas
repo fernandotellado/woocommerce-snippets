@@ -1,8 +1,4 @@
-/* Enlazar a pestañas de producto de WooCommerce */
-<?php
-/**
- * wc_direct_link_to_product_tabs
- *
+/** Enlazar a pestañas de producto de WooCommerce
  * Allows you to create custom URLs to activate product tabs by default, directly from the URL
  * ex: http://mysite.com/my-product-name#reviews
 */
