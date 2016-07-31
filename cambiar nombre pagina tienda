@@ -1,4 +1,6 @@
-Cambiar nombre de la página de tienda
+/**
+* Cambiar nombre tienda
+*/
 
 add_filter( 'woocommerce_page_title', 'woo_shop_page_title');
  
