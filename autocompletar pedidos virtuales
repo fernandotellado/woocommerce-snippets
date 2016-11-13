@@ -1,0 +1,33 @@
+/**
+ * Autocompleta todos los pedidos virtuales
+ * http://docs.woothemes.com/document/automaticaaly-complete-orders/
+ */
+ 
+add_filter( 'woocommerce_payment_complete_order_status', 'virtual_order_payment_complete_order_status', 10, 2 );
+function virtual_order_payment_complete_order_status( $order_status, $order_id ) {
+  $order = new WC_Order( $order_id );
+  if ( 'processing' == $order_status &&
+       ( 'on-hold' == $order->status || 'pending' == $order->status || 'failed' == $order->status ) ) {
+    $virtual_order = null;
+    if ( count( $order->get_items() ) > 0 ) {
+      foreach( $order->get_items() as $item ) {
+        if ( 'line_item' == $item['type'] ) {
+          $_product = $order->get_product_from_item( $item );
+          if ( ! $_product->is_virtual() ) {
+            // cuando encontramos un producto no virtual terminamos y rompemos el loop
+            $virtual_order = false;
+            break;
+          } else {
+            $virtual_order = true;
+          }
+        }
+      }
+    }
+    // pedido virtual, marcado como completo
+    if ( $virtual_order ) {
+      return 'completed';
+    }
+  }
+  // pedido no virtual, lo devolvemos al estado original
+  return $order_status;
+}
