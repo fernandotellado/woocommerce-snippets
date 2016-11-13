@@ -1,0 +1,13 @@
+/**
+ * Autocompleta los pedidos en espera
+ */
+add_filter( 'woocommerce_payment_complete_order_status', 'bryce_wc_autocomplete_paid_orders' );
+function bryce_wc_autocomplete_paid_orders( $order_status, $order_id ) {
+	
+	$order = wc_get_order( $order_id );
+	if ( $order_status == 'processing' && ( $order->status == 'on-hold' || $order->status == 'pending' || $order->status == 'failed' ) ) {
+		return 'completed';
+	}
+	
+	return $order_status;
+}
