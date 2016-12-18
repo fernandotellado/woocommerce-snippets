@@ -1,0 +1,10 @@
+/*
+ * wc_remove_related_products
+ * 
+ * Quita los argumentos de busqeuda para mostrar productos relacionados para no mostrar ninguno.
+ * Agrega este codigo al archivo functions.php de tu tema o a tu plugin de personalizaciones.  
+ */
+function wc_remove_related_products( $args ) {
+	return array();
+}
+add_filter('woocommerce_related_products_args','wc_remove_related_products', 10);
