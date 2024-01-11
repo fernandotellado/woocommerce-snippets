@@ -1,0 +1,7 @@
+/* Mostrar widget fijo de divisas solo si la pagina es woo */
+if ( ! function_exists( 'yith_wcmcs_print_sticky_currencies' ) ) {
+    function yith_wcmcs_print_sticky_currencies( $print ) {
+    return is_shop() || is_product_taxonomy() || is_cart() || is_checkout() || is_product();
+       }
+    add_filter( 'yith_wcmcs_print_sticky_currencies', 'yith_wcmcs_print_sticky_currencies', 99 );
+   }
