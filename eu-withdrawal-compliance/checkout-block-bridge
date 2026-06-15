@@ -1,0 +1,172 @@
+<?php
+/**
+ * EU Withdrawal Compliance — Checkout block bridge (TEMPORARY).
+ *
+ * Renders the two consent checkboxes (Art. 16(m) mandatory, Art. 14(4)(a)
+ * optional) on the WooCommerce Checkout block and persists the proof INTO THE
+ * SAME order meta keys the plugin uses, so the consent is recorded where the
+ * plugin — and you — can produce it in a dispute.
+ *
+ * Requirements: WooCommerce 8.9+ (Additional Checkout Fields API) and the
+ * EU Withdrawal Compliance plugin active (the bridge reads the consent text,
+ * the per-cart condition and the on/off switches from it).
+ *
+ * Install: drop in wp-content/mu-plugins/ (or as a code snippet).
+ * Remove it once the plugin ships native Checkout block support (v1.10.0),
+ * or the consents would be registered and saved twice.
+ *
+ * @package AyudaWP_EU_Withdrawal_Block_Bridge
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+const AYUDAWP_EUW_BLOCK_FIELD_A = 'ayudawp-euw/consent-a';
+const AYUDAWP_EUW_BLOCK_FIELD_B = 'ayudawp-euw/consent-b';
+
+/**
+ * Whether a consent type is enabled in the plugin settings.
+ * Defaults to true when the plugin is inactive so the bridge degrades safely.
+ */
+function ayudawp_euw_block_enabled( $type ) {
+	return ! function_exists( 'ayudawp_euw_consent_is_enabled' )
+		|| ayudawp_euw_consent_is_enabled( $type );
+}
+
+/**
+ * Register the two checkboxes on the Checkout block ("order" location).
+ *
+ * They are intentionally NOT registered as required: a static "required"
+ * would force the box on every cart and block non-digital orders. The
+ * mandatory Art. 16(m) box is enforced conditionally below, only when the
+ * cart actually contains a digital-content item.
+ */
+add_action(
+	'woocommerce_init',
+	function () {
+
+		if ( ! function_exists( 'woocommerce_register_additional_checkout_field' ) ) {
+			return; // WooCommerce < 8.9: API not available.
+		}
+
+		if ( ayudawp_euw_block_enabled( 'a' ) ) {
+			woocommerce_register_additional_checkout_field(
+				array(
+					'id'       => AYUDAWP_EUW_BLOCK_FIELD_A,
+					'label'    => function_exists( 'ayudawp_euw_get_consent_text' )
+						? ayudawp_euw_get_consent_text( 'a' )
+						: 'I expressly request immediate access to the digital content and acknowledge that I lose the 14-day right of withdrawal (Art. 16(m)).',
+					'location' => 'order',
+					'type'     => 'checkbox',
+					'required' => false,
+				)
+			);
+		}
+
+		if ( ayudawp_euw_block_enabled( 'b' ) ) {
+			woocommerce_register_additional_checkout_field(
+				array(
+					'id'       => AYUDAWP_EUW_BLOCK_FIELD_B,
+					'label'    => function_exists( 'ayudawp_euw_get_consent_text' )
+						? ayudawp_euw_get_consent_text( 'b' )
+						: 'I expressly request that the service starts within the 14-day withdrawal period (Art. 14(4)(a)).',
+					'location' => 'order',
+					'type'     => 'checkbox',
+					'required' => false,
+				)
+			);
+		}
+	}
+);
+
+/**
+ * Enforce the mandatory Art. 16(m) consent only when the cart requires it.
+ *
+ * @param WP_Error $errors Error collector.
+ * @param array    $fields Submitted order-location field values, keyed by id.
+ * @param mixed    $group  Field group (unused).
+ */
+add_action(
+	'woocommerce_blocks_validate_location_order_fields',
+	function ( WP_Error $errors, $fields, $group ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+
+		$requires_a = ayudawp_euw_block_enabled( 'a' )
+			&& function_exists( 'ayudawp_euw_cart_requires_consent' )
+			&& ayudawp_euw_cart_requires_consent( 'a' );
+
+		if ( ! $requires_a ) {
+			return;
+		}
+
+		// empty( '0' ) is true in PHP, so unchecked ("0"/""/false) all fail.
+		if ( empty( $fields[ AYUDAWP_EUW_BLOCK_FIELD_A ] ) ) {
+			$errors->add(
+				'ayudawp_euw_consent_a_required',
+				'You must accept the digital content consent required to apply the withdrawal-right exception under Article 16(m) of Directive 2011/83/EU.'
+			);
+		}
+	},
+	10,
+	3
+);
+
+/**
+ * Mirror the submitted consents into the plugin's own order meta.
+ *
+ * Fires after the Store API checkout has already persisted the additional
+ * fields under "_wc_other/<id>", so we read those and rewrite the five meta
+ * keys the plugin uses for proof, HPOS-safe via WC_Order::update_meta_data().
+ *
+ * @param WC_Order $order Created order.
+ */
+add_action(
+	'woocommerce_store_api_checkout_order_processed',
+	function ( $order ) {
+
+		if ( ! $order instanceof WC_Order ) {
+			return;
+		}
+
+		$timestamp = gmdate( 'c' );
+		$ip        = function_exists( 'ayudawp_euw_get_user_ip' ) ? ayudawp_euw_get_user_ip() : '';
+		$ua        = isset( $_SERVER['HTTP_USER_AGENT'] )
+			? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) )
+			: '';
+
+		$map   = array(
+			'a' => AYUDAWP_EUW_BLOCK_FIELD_A,
+			'b' => AYUDAWP_EUW_BLOCK_FIELD_B,
+		);
+		$saved = false;
+
+		foreach ( $map as $type => $field_id ) {
+
+			$required = function_exists( 'ayudawp_euw_cart_requires_consent' )
+				&& ayudawp_euw_cart_requires_consent( $type );
+
+			if ( ! ayudawp_euw_block_enabled( $type ) || ! $required ) {
+				continue;
+			}
+
+			// "1" = checked, "0"/"" = not. Read from the meta WC already wrote.
+			$raw      = (string) $order->get_meta( '_wc_other/' . $field_id );
+			$accepted = ( '1' === $raw ) ? 'yes' : 'no';
+			$text     = function_exists( 'ayudawp_euw_get_consent_text' )
+				? ayudawp_euw_get_consent_text( $type )
+				: '';
+
+			$order->update_meta_data( '_ayudawp_euw_consent_' . $type . '_accepted', $accepted );
+			$order->update_meta_data( '_ayudawp_euw_consent_' . $type . '_text', $text );
+			$order->update_meta_data( '_ayudawp_euw_consent_' . $type . '_timestamp', $timestamp );
+			$order->update_meta_data( '_ayudawp_euw_consent_' . $type . '_ip', $ip );
+			$order->update_meta_data( '_ayudawp_euw_consent_' . $type . '_ua', $ua );
+
+			$saved = true;
+		}
+
+		if ( $saved ) {
+			$order->save();
+		}
+	}
+);
