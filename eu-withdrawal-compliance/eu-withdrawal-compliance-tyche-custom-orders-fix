@@ -1,0 +1,47 @@
+<?php
+/**
+ * EU Withdrawal Compliance: match orders numbered by
+ * "Custom Order Numbers for WooCommerce" (Tyche Softwares).
+ *
+ * Tyche stores the displayed order number in _alg_wc_full_custom_order_number
+ * (full number with prefix/suffix/date) and the base value in
+ * _alg_wc_custom_order_number. EU Withdrawal Compliance 1.9.0 only looks up the
+ * standard _order_number meta, which Tyche does not use, so the form cannot
+ * match the order. This resolves it through Tyche's own meta keys.
+ */
+add_filter(
+	'ayudawp_euw_pre_resolve_wc_order',
+	function ( $pre, $order_ref ) {
+
+		// Only step in if the plugin has not already resolved the order.
+		if ( null !== $pre || ! function_exists( 'wc_get_orders' ) ) {
+			return $pre;
+		}
+
+		$order_ref = trim( (string) $order_ref );
+
+		if ( '' === $order_ref ) {
+			return $pre;
+		}
+
+		foreach ( array( '_alg_wc_full_custom_order_number', '_alg_wc_custom_order_number' ) as $meta_key ) {
+			$matches = wc_get_orders(
+				array(
+					'limit'      => 1,
+					'meta_key'   => $meta_key,
+					'meta_value' => $order_ref,
+					'return'     => 'ids',
+					'status'     => array_keys( wc_get_order_statuses() ),
+				)
+			);
+
+			if ( ! empty( $matches ) ) {
+				return wc_get_order( (int) $matches[0] );
+			}
+		}
+
+		return $pre;
+	},
+	10,
+	2
+);
