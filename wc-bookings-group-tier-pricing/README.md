@@ -79,7 +79,7 @@ Tiers are evaluated in order; the first one whose `max_total` is greater than or
 
 This plugin only handles price. To cap attendees per time slot, use WooCommerce Bookings' own settings: enable **Count persons as bookings** and set **Max per block** to your capacity — this already counts every person type, including free ones, against the limit.
 
-## Known limitations
+## Limitations
 
 - **Live price preview**: WooCommerce Bookings recalculates the displayed cost via an AJAX call that runs through this same PHP calculation, so the tiered price should already show correctly on the product page as the customer changes quantities. Test this on your specific WooCommerce Bookings version before going live — if a future version ever estimates cost client-side without a server round trip, the preview could lag behind the final cart price.
 - Tiers apply per product. If you need different tier tables per bookable product, use the `$product` argument passed to both filters.
