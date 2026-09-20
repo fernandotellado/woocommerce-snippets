@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name:       WC Bookings Group Tier Pricing
- * Plugin URI:        https://github.com/YOUR-USERNAME/wc-bookings-group-tier-pricing
+ * Plugin URI:        https://github.com/fernandotellado/woocommerce-snippets/blob/master/wc-bookings-group-tier-pricing/
  * Description:       Adds attendee-count pricing tiers to WooCommerce Bookings. Lets the price per person type change based on the TOTAL number of people in a single booking, not just the person type itself (e.g. "Adult" drops from 20 to 15 once the group reaches 15 people).
  * Version:           1.0.0
  * Author:            Fernando Tellado
- * Author URI:        https://plugins.ayudawp.com
+ * Author URI:        https://ayudawp.com
  * License:           GPL v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       wc-bookings-group-tier-pricing
