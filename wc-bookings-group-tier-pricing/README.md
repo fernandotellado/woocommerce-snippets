@@ -93,6 +93,7 @@ GPL v2 or later.
 Need help or have suggestions?
 
 - [Official website](https://servicios.ayudawp.com)
+- [GitHub Issues](https://github.com/fernandotellado/wc-bookings-group-tier-pricing/issues)
 - [YouTube channel](https://www.youtube.com/AyudaWordPressES)
 - [Documentation and tutorials](https://ayudawp.com)
 
